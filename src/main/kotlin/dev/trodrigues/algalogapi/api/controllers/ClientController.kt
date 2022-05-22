@@ -33,4 +33,15 @@ class ClientController(
         }
     }
 
+    @PutMapping("/{clientId}")
+    fun updateClient(@PathVariable clientId: UUID, @RequestBody updateClient: Client): ResponseEntity<Client> {
+        return if (clientRepository.existsById(clientId)) {
+            val client = clientRepository.findById(clientId).orElseThrow { IllegalArgumentException("") }
+            val updatedClient = client.copy(name = updateClient.name, phoneNumber = updateClient.phoneNumber)
+            ResponseEntity.ok(clientRepository.save(updatedClient))
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
+
 }
