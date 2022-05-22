@@ -44,4 +44,15 @@ class ClientController(
         }
     }
 
+    @DeleteMapping("/{clientId}")
+    fun deleteClient(@PathVariable clientId: UUID): ResponseEntity<Void> {
+        return if (clientRepository.existsById(clientId)) {
+            val client = clientRepository.findById(clientId).orElseThrow { IllegalArgumentException("") }
+            clientRepository.delete(client)
+            ResponseEntity.noContent().build()
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
+
 }
