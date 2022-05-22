@@ -3,7 +3,10 @@ package dev.trodrigues.algalogapi.api.controllers
 import dev.trodrigues.algalogapi.api.requests.ClientRequest
 import dev.trodrigues.algalogapi.api.requests.toEntity
 import dev.trodrigues.algalogapi.domain.entities.Client
-import dev.trodrigues.algalogapi.infra.repositories.ClientRepository
+import dev.trodrigues.algalogapi.domain.services.ClientCatalogService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,50 +17,33 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/clients")
 class ClientController(
-    private val clientRepository: ClientRepository
+    private val clientCatalogService: ClientCatalogService
 ) {
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE])
-    fun list(): List<Client> = clientRepository.findAll()
+    fun list(pageable: Pageable): Page<Client> = clientCatalogService.findAll(pageable)
 
     @GetMapping("/{clientId}")
-    fun findByClientId(@PathVariable clientId: UUID): ResponseEntity<Client> =
-        clientRepository.findById(clientId).map { ResponseEntity.ok(it) }
-            .orElseThrow { IllegalArgumentException("Client not found: $clientId") }
+    fun findByClientId(@PathVariable clientId: UUID): Client =
+        clientCatalogService.findById(clientId)
 
     @PostMapping
     fun createClient(@RequestBody @Valid clientRequest: ClientRequest): ResponseEntity<Client> {
-        return if (clientRepository.existsByEmail(clientRequest.email!!)) {
-            ResponseEntity.badRequest().build()
-        } else {
-            val newClient = clientRepository.save(clientRequest.toEntity())
-            val uri = URI("/clients/${newClient.id}")
-            ResponseEntity.created(uri).body(newClient)
-        }
+        val client = clientCatalogService.createClient(clientRequest.toEntity())
+        val uri = URI("/clients/${client.id}")
+        return ResponseEntity.created(uri).body(client)
     }
 
     @PutMapping("/{clientId}")
     fun updateClient(
         @PathVariable clientId: UUID,
         @RequestBody @Valid clientRequest: ClientRequest
-    ): ResponseEntity<Client> {
-        return if (clientRepository.existsById(clientId)) {
-            val client = clientRepository.findById(clientId).orElseThrow { IllegalArgumentException("") }
-            val updatedClient = clientRequest.toEntity(client)
-            ResponseEntity.ok(clientRepository.save(updatedClient))
-        } else {
-            ResponseEntity.notFound().build()
-        }
-    }
+    ): Client =
+        clientCatalogService.updateClient(clientId, clientRequest)
 
     @DeleteMapping("/{clientId}")
-    fun deleteClient(@PathVariable clientId: UUID): ResponseEntity<Void> {
-        return if (clientRepository.existsById(clientId)) {
-            clientRepository.deleteById(clientId)
-            ResponseEntity.noContent().build()
-        } else {
-            ResponseEntity.notFound().build()
-        }
-    }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteClient(@PathVariable clientId: UUID) =
+        clientCatalogService.deleteById(clientId)
 
 }
