@@ -5,3 +5,5 @@ spring:
     url: jdbc:postgresql://${POSTGRESQL_HOST:localhost}:5432/algalog
     username: algalog
     password: algalog
+  jpa:
+    show-sql: true
