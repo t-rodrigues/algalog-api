@@ -1,5 +1,7 @@
 package dev.trodrigues.algalogapi.api.controllers
 
+import dev.trodrigues.algalogapi.api.requests.ClientRequest
+import dev.trodrigues.algalogapi.api.requests.toEntity
 import dev.trodrigues.algalogapi.domain.entities.Client
 import dev.trodrigues.algalogapi.infra.repositories.ClientRepository
 import org.springframework.http.MediaType
@@ -7,6 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
 import java.util.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/clients")
@@ -23,21 +26,24 @@ class ClientController(
             .orElseThrow { IllegalArgumentException("Client not found: $clientId") }
 
     @PostMapping
-    fun createClient(@RequestBody client: Client): ResponseEntity<Client> {
-        return if (clientRepository.existsByEmail(client.email)) {
+    fun createClient(@RequestBody @Valid clientRequest: ClientRequest): ResponseEntity<Client> {
+        return if (clientRepository.existsByEmail(clientRequest.email!!)) {
             ResponseEntity.badRequest().build()
         } else {
-            val newClient = clientRepository.save(client)
+            val newClient = clientRepository.save(clientRequest.toEntity())
             val uri = URI("/clients/${newClient.id}")
             ResponseEntity.created(uri).body(newClient)
         }
     }
 
     @PutMapping("/{clientId}")
-    fun updateClient(@PathVariable clientId: UUID, @RequestBody updateClient: Client): ResponseEntity<Client> {
+    fun updateClient(
+        @PathVariable clientId: UUID,
+        @RequestBody @Valid clientRequest: ClientRequest
+    ): ResponseEntity<Client> {
         return if (clientRepository.existsById(clientId)) {
             val client = clientRepository.findById(clientId).orElseThrow { IllegalArgumentException("") }
-            val updatedClient = client.copy(name = updateClient.name, phoneNumber = updateClient.phoneNumber)
+            val updatedClient = clientRequest.toEntity(client)
             ResponseEntity.ok(clientRepository.save(updatedClient))
         } else {
             ResponseEntity.notFound().build()
@@ -47,8 +53,7 @@ class ClientController(
     @DeleteMapping("/{clientId}")
     fun deleteClient(@PathVariable clientId: UUID): ResponseEntity<Void> {
         return if (clientRepository.existsById(clientId)) {
-            val client = clientRepository.findById(clientId).orElseThrow { IllegalArgumentException("") }
-            clientRepository.delete(client)
+            clientRepository.deleteById(clientId)
             ResponseEntity.noContent().build()
         } else {
             ResponseEntity.notFound().build()
