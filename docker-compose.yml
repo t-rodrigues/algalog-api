@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  db:
+    container_name: mysql
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'true'
+      MYSQL_USER: algalog
+      MYSQL_PASSWORD: algalog
+      MYSQL_DATABASE: algalog_db
+    ports:
+      - 3306:3306
+    volumes:
+      - algalog_data:/var/lib/mysql
+
+volumes:
+  algalog_data:

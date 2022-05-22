@@ -1,1 +1,7 @@
-
+spring:
+  application:
+    name: algalog-api
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/algalog_db?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: algalog
+    password: algalog
