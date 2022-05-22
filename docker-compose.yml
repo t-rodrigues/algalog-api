@@ -2,18 +2,18 @@ version: '3'
 
 services:
   db:
-    container_name: mysql
-    image: mysql:8
+    container_name: postgresql
+    image: postgres:14.3-alpine
     restart: always
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: 'true'
-      MYSQL_USER: algalog
-      MYSQL_PASSWORD: algalog
-      MYSQL_DATABASE: algalog_db
+      POSTGRES_USER: algalog
+      POSTGRES_PASSWORD: algalog
+      POSTGRES_DATABASE: algalog
     ports:
-      - 3306:3306
+      - '5432:5432'
     volumes:
-      - algalog_data:/var/lib/mysql
+      - algalog_data:/var/lib/postgresql/data
 
 volumes:
   algalog_data:
+    driver: local
