@@ -2,11 +2,12 @@ package dev.trodrigues.algalogapi.api.controllers
 
 import dev.trodrigues.algalogapi.api.requests.DeliveryRequest
 import dev.trodrigues.algalogapi.api.responses.DeliveryResponse
+import dev.trodrigues.algalogapi.api.responses.PageResponse
+import dev.trodrigues.algalogapi.api.responses.mapper.toPageResponse
 import dev.trodrigues.algalogapi.api.responses.mapper.toResponse
 import dev.trodrigues.algalogapi.domain.services.DeliveryRequestService
 import dev.trodrigues.algalogapi.domain.services.exceptions.NotFoundException
 import dev.trodrigues.algalogapi.infra.repositories.DeliveryRepository
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -27,9 +28,9 @@ class DeliveryController(
     }
 
     @GetMapping
-    fun list(pageable: Pageable): Page<DeliveryResponse> {
+    fun list(pageable: Pageable): PageResponse<DeliveryResponse> {
         val deliveries = deliveryRepository.findAll(pageable)
-        return deliveries.map { it.toResponse() }
+        return deliveries.map { it.toResponse() }.toPageResponse()
     }
 
     @GetMapping("/{deliveryId}")
