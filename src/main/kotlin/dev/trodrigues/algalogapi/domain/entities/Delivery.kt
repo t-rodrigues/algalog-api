@@ -17,6 +17,8 @@ data class Delivery(
     @Embedded
     val recipient: Recipient,
     val fee: BigDecimal,
+    @OneToMany(mappedBy = "delivery", fetch = FetchType.LAZY)
+    val occurrences: List<Occurrence>? = mutableListOf(),
     @Enumerated(EnumType.STRING)
     var status: DeliveryStatus? = null,
     var orderDate: LocalDateTime? = null,
