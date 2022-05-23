@@ -11,14 +11,14 @@ import javax.persistence.*
 data class Delivery(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID,
+    val id: UUID? = null,
     @ManyToOne
     val client: Client,
     @Embedded
     val recipient: Recipient,
     val fee: BigDecimal,
     @Enumerated(EnumType.STRING)
-    val status: DeliveryStatus,
-    val orderDate: LocalDateTime,
-    val endDate: LocalDateTime
+    var status: DeliveryStatus? = null,
+    var orderDate: LocalDateTime? = null,
+    var endDate: LocalDateTime? = null
 )
