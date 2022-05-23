@@ -1,7 +1,8 @@
 package dev.trodrigues.algalogapi.api.controllers
 
 import dev.trodrigues.algalogapi.api.requests.DeliveryRequest
-import dev.trodrigues.algalogapi.domain.entities.Delivery
+import dev.trodrigues.algalogapi.api.responses.DeliveryResponse
+import dev.trodrigues.algalogapi.api.responses.mapper.toResponse
 import dev.trodrigues.algalogapi.domain.services.DeliveryRequestService
 import dev.trodrigues.algalogapi.domain.services.exceptions.NotFoundException
 import dev.trodrigues.algalogapi.infra.repositories.DeliveryRepository
@@ -20,14 +21,22 @@ class DeliveryController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun requestDelivery(@RequestBody @Valid deliveryRequest: DeliveryRequest): Delivery =
-        deliveryRequestService.request(deliveryRequest)
+    fun requestDelivery(@RequestBody @Valid deliveryRequest: DeliveryRequest): DeliveryResponse {
+        val delivery = deliveryRequestService.request(deliveryRequest)
+        return delivery.toResponse()
+    }
 
     @GetMapping
-    fun list(pageable: Pageable): Page<Delivery> = deliveryRepository.findAll(pageable)
+    fun list(pageable: Pageable): Page<DeliveryResponse> {
+        val deliveries = deliveryRepository.findAll(pageable)
+        return deliveries.map { it.toResponse() }
+    }
 
     @GetMapping("/{deliveryId}")
-    fun findByDeliveryId(@PathVariable deliveryId: UUID): Delivery =
-        deliveryRepository.findById(deliveryId).orElseThrow { NotFoundException("delivery not found: $deliveryId") }
+    fun findByDeliveryId(@PathVariable deliveryId: UUID): DeliveryResponse {
+        val delivery =
+            deliveryRepository.findById(deliveryId).orElseThrow { NotFoundException("delivery not found: $deliveryId") }
+        return delivery.toResponse()
+    }
 
 }
