@@ -17,10 +17,17 @@ data class Delivery(
     @Embedded
     val recipient: Recipient,
     val fee: BigDecimal,
-    @OneToMany(mappedBy = "delivery", fetch = FetchType.LAZY)
-    val occurrences: List<Occurrence>? = mutableListOf(),
+    @OneToMany(mappedBy = "delivery", cascade = [CascadeType.ALL])
+    val occurrences: MutableList<Occurrence> = mutableListOf(),
     @Enumerated(EnumType.STRING)
     var status: DeliveryStatus? = null,
     var orderDate: LocalDateTime? = null,
     var endDate: LocalDateTime? = null
-)
+) {
+    fun addOccurrence(description: String): Occurrence {
+        val occurrence = Occurrence(description = description, occurrenceDate = LocalDateTime.now(), delivery = this)
+        occurrences.add(occurrence)
+        return occurrence
+    }
+
+}
