@@ -1,5 +1,6 @@
 package dev.trodrigues.algalogapi.domain.entities
 
+import dev.trodrigues.algalogapi.domain.services.exceptions.BusinessException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -29,5 +30,16 @@ data class Delivery(
         occurrences.add(occurrence)
         return occurrence
     }
+
+    fun finish() {
+        if (!canFinish()) {
+            throw BusinessException("delivery can not finish")
+        }
+        this.status = DeliveryStatus.FINALIZED
+        this.endDate = LocalDateTime.now()
+    }
+
+    fun canFinish(): Boolean =
+        DeliveryStatus.PENDING == this.status
 
 }
